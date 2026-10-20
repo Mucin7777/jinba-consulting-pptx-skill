@@ -66,6 +66,7 @@ description: スライド設計規約 slide-rules.md を核に、経営会議品
    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
      --no-pdf-header-footer --print-to-pdf=mydeck.pdf mydeck.html
    ```
+   Linux（Claude Code のクラウド環境・Docker）では、最初に一度 `bash scripts/setup_linux.sh` を実行する（和文フォントと書体名の対応づけ。しないと和文が中国語の字形になり、見出しの明朝もゴシックになる）。PDF 化のコマンドはこのスクリプトが表示する（root なら `--no-sandbox` が要る）。全ページの画像化は `pdftoppm -r 60 -png mydeck.pdf page`。
 
 ## PowerPoint（.pptx）が要るとき
 

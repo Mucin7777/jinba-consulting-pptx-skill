@@ -201,7 +201,15 @@ class ProductionMeta(unittest.TestCase):
 
 def _has_playwright():
     import os
-    return (ROOT / "node_modules" / "playwright").exists() or bool(os.environ.get("PLAYWRIGHT_MODULE_DIR"))
+    import shutil
+    if (ROOT / "node_modules" / "playwright").exists() or os.environ.get("PLAYWRIGHT_MODULE_DIR"):
+        return True
+    # npm install -g で入れたもの（check_layout.mjs も同じ順で探す）
+    npm = shutil.which("npm")  # Windows では npm.cmd なので、見つけたパスのまま渡す
+    if not npm:
+        return False
+    r = subprocess.run([npm, "root", "-g"], capture_output=True, text=True)
+    return r.returncode == 0 and (Path(r.stdout.strip()) / "playwright").exists()
 
 
 @unittest.skipUnless(_has_playwright(), "npm run setup で playwright を入れると実行される")

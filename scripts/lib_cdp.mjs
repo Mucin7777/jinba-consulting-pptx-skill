@@ -12,7 +12,8 @@ export async function openPage(file, { width = 1400, height = 900, scale = 1, me
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "/usr/bin/google-chrome", "/usr/bin/chromium",
+    "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser",
+    "/opt/pw-browsers/chromium", // Claude Code のクラウド環境（playwright の Chromium）
   ].find(existsSync);
   if (!CHROME) throw new Error("Chrome が見つからない（CHROME_PATH で指定可）");
 
@@ -20,6 +21,8 @@ export async function openPage(file, { width = 1400, height = 900, scale = 1, me
   const port = 9222 + Math.floor(Math.random() * 1000);
   const chrome = spawn(CHROME, [
     "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
+    // root で動かすコンテナ（クラウド環境・Docker）では sandbox 無しでないと Chrome が起動しない
+    ...(process.getuid?.() === 0 ? ["--no-sandbox"] : []),
     `--remote-debugging-port=${port}`, `--user-data-dir=${userDataDir}`, "about:blank",
   ], { stdio: ["ignore", "ignore", "ignore"] });
 

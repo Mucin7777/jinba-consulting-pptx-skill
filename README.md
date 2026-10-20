@@ -60,6 +60,8 @@ cd ~/.claude/skills/consulting-pptx-skill && npm run setup
 pip3 install python-pptx
 ```
 
+**Linux（Claude Code のクラウド環境・Docker など）**では、上に加えて `bash scripts/setup_linux.sh` を一度実行します。和文フォント（Noto CJK）を入れ、パーツ集の書体名（Yu Gothic・Yu Mincho・ヒラギノ）をそれに対応づけ、python-pptx・playwright・Chrome が揃っているかを表示します。これをしないと和文が中国語の字形で描かれ、見出しの明朝もゴシックになります。Claude Code のクラウド環境でこのリポジトリをセッションに入れた場合は、`.claude/skills/consulting-pptx-skill/` の入口からスキルとして読み込まれるので、clone の手順は要りません（playwright と Chromium も入っているので `npm run setup` も不要）。
+
 - `scripts/check_deck.py`（規約の機械チェック）と `scripts/new_deck.py`（たたき台の生成）は Python 標準ライブラリだけで動きます。
 - PDF 化は Chrome のヘッドレス印刷を使います（コマンドは次節）。
 - `package.json` は手順2の playwright を入れるためだけのものです。`node_modules/` は .gitignore 済みです。
@@ -127,6 +129,8 @@ python3 scripts/check_deck.py pages.pptx --house house.skin.json
 | `scripts/check_layout.mjs` | HTMLデッキの実レンダリング検査（フッターとの重なり・右端/下端のはみ出し・版面の40%超の空き） |
 | `scripts/measure_deck.py` | 既存の PowerPoint 資料の書式（レイアウト・タイトルの枠・文字の大きさ・書体の指定の有無・罫線・色）を測り、`skin.json` に書き出す |
 | `scripts/deck_pptx.py` | 測った書式で、その資料のマスターの上に編集可能なページを組む部品（タイトル・見出し・罫線の表・強調の面・矢羽・✓✕△）。作例は `examples/house_deck_example.py` |
+| `scripts/setup_linux.sh` | Linux（クラウド環境・Docker）用の準備。和文フォントを入れ、パーツ集の書体名を対応づける（`scripts/fontconfig-ja.conf`）。何度実行してもよい |
+| `.claude/skills/consulting-pptx-skill/SKILL.md` | このリポジトリをセッションに入れたとき（Claude Code のクラウド環境など）にスキルとして読み込まれる入口。本体は直下の `SKILL.md` |
 | `tests/` | 機械チェックの自己テスト（`python3 -m unittest discover -s tests`）。指摘を機械チェックにしたら、直していない版で FAIL が出ることをここで確かめる |
 | `assets/SlideCatalog_16x9.pdf` | **62型のスライド型カタログ（両パーツ集を印刷した62ページ）。型を探すときの入口** |
 | `assets/SuperTemplate_62type.pptx` | 62型のPPTX見本帳（全スライド編集可能）。PowerPoint で手動コピーして使うときの見本。パーツ集の正本ではない |

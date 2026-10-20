@@ -20,20 +20,29 @@
 //  18. 同じ作りの本文の文字が違う大きさ・文の途中の太字が3か所以上（WARN。§4.19・§5.5）
 //   4 の補足: 版面の30%超が空いているときは WARN（40%超は FAIL）
 // 正本から差し込んだ定型ページ（section に .std。§4.99）は、はみ出し以外の検査を飛ばす
-// 使い方: node scripts/check_layout.mjs deck.html   （playwright 必須: リポ直下で `npm run setup`。PLAYWRIGHT_MODULE_DIR でも解決可）
+// 使い方: node scripts/check_layout.mjs deck.html   （playwright 必須: リポ直下で `npm run setup`。PLAYWRIGHT_MODULE_DIR・npm install -g でも解決可）
 import path from "node:path";
+import { execSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
 async function loadPlaywright() {
+  const tryDir = async (c) => {
+    try { return (await import(pathToFileURL(path.join(c, "index.mjs")).href)); } catch {}
+    try { const m = await import(pathToFileURL(path.join(c, "index.js")).href); return m.default ?? m; } catch {}
+    return null;
+  };
   const cands = [
     process.env.PLAYWRIGHT_MODULE_DIR,
     path.join(process.cwd(), "node_modules", "playwright"),
     path.join(path.dirname(new URL(import.meta.url).pathname), "..", "node_modules", "playwright"),
   ].filter(Boolean);
-  for (const c of cands) {
-    try { return (await import(pathToFileURL(path.join(c, "index.mjs")).href)); } catch {}
-    try { const m = await import(pathToFileURL(path.join(c, "index.js")).href); return m.default ?? m; } catch {}
-  }
+  for (const c of cands) { const m = await tryDir(c); if (m) return m; }
+  // npm install -g で入れたもの（Claude Code のクラウド環境はこれ）。ESM の import は global を探さないので npm に聞く
+  try {
+    const g = execSync("npm root -g", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const m = await tryDir(path.join(g, "playwright"));
+    if (m) return m;
+  } catch {}
   return await import("playwright");
 }
 
